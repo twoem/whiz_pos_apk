@@ -23,7 +23,18 @@ interface User {
   pin?: string;
 }
 
-interface Product {
+export interface BusinessSetup {
+  businessName: string;
+  phone?: string;
+  address: string;
+  receiptHeader?: string;
+  receiptFooter?: string;
+  mpesaPaybill?: string;
+  mpesaAccountNumber?: string;
+  mpesaTill?: string;
+}
+
+export interface Product {
   id: string; // Use string for ID to match desktop/mongo
   _id?: string;
   name: string;
@@ -34,7 +45,7 @@ interface Product {
   minStock?: number;
 }
 
-interface CartItem extends Product {
+export interface CartItem extends Product {
   cartId: string;
   quantity: number;
 }
@@ -45,7 +56,7 @@ interface ConnectionSettings {
   isConnected: boolean;
 }
 
-interface Transaction {
+export interface Transaction {
   id: string;
   items: CartItem[];
   total: number;
@@ -54,6 +65,12 @@ interface Transaction {
   cashierId?: string;
   cashierName?: string;
   status: string;
+  // Extended properties for compatibility
+  cashier?: string;
+  subtotal?: number;
+  tax?: number;
+  creditCustomer?: string;
+  date?: string; // Sometimes used interchangeably with timestamp
 }
 
 interface Expense {
@@ -117,6 +134,9 @@ interface MobileStore {
   setSalaries: (salaries: Salary[]) => void;
   setCreditCustomers: (customers: CreditCustomer[]) => void;
 
+  businessSetup: BusinessSetup;
+  setBusinessSetup: (setup: BusinessSetup) => void;
+
   addTransaction: (transaction: Transaction) => void;
   addExpense: (expense: Expense) => void;
   addSalary: (salary: Salary) => void;
@@ -165,6 +185,9 @@ export const useMobileStore = create<MobileStore>()(
       expenses: [],
       salaries: [],
       creditCustomers: [],
+      businessSetup: { businessName: 'Whiz POS', address: '' },
+
+      setBusinessSetup: (setup) => set({ businessSetup: setup }),
 
       setProducts: (products) => set({
         products,
@@ -249,8 +272,26 @@ export const useMobileStore = create<MobileStore>()(
 
       syncQueue: [],
       addToSyncQueue: (item) => {
+        // OPTIMIZATION: Strip heavy data (images) from transactions before queueing
+        let optimizedItem = { ...item };
+
+        if (item.type === 'transaction' || item.type === 'new-transaction') {
+             const optimizedData = { ...item.data };
+             if (optimizedData.items && Array.isArray(optimizedData.items)) {
+                 optimizedData.items = optimizedData.items.map((i: any) => ({
+                     id: i.id || i.product?.id,
+                     name: i.name, // Keep name for receipt integrity
+                     price: i.price,
+                     quantity: i.quantity,
+                     // STRIP IMAGE and other heavy props
+                     // Do NOT send 'image' or 'description'
+                 }));
+             }
+             optimizedItem.data = optimizedData;
+        }
+
         // Ensure item has a unique queue ID if not present, to enable safe removal
-        const queueItem = { ...item, _queueId: item._queueId || crypto.randomUUID() };
+        const queueItem = { ...optimizedItem, _queueId: optimizedItem._queueId || crypto.randomUUID() };
         set((state) => ({ syncQueue: [...state.syncQueue, queueItem] }));
       },
       removeSyncedItems: (itemsToRemove) => set((state) => {
@@ -275,7 +316,8 @@ export const useMobileStore = create<MobileStore>()(
         transactions: state.transactions,
         expenses: state.expenses,
         salaries: state.salaries,
-        creditCustomers: state.creditCustomers
+        creditCustomers: state.creditCustomers,
+        businessSetup: state.businessSetup
       }),
       onRehydrateStorage: () => (state) => {
         state?.setIsHydrated(true);

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useMobileStore } from '../store/mobileStore';
 import { cn } from '../lib/utils';
-import { ShoppingCart, Search, Menu, LogOut, RefreshCw, X, Receipt, DollarSign, Users, Settings, Trash2, Plus, Minus, BarChart3 } from 'lucide-react';
+import { ShoppingCart, Search, Menu, LogOut, RefreshCw, X, Receipt, DollarSign, Users, Settings, Trash2, Plus, Minus, BarChart3, FileText, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../services/api';
 import CheckoutModal from '../components/CheckoutModal';
@@ -13,6 +13,7 @@ export default function Dashboard() {
     currentUser,
     products,
     categories,
+    transactions,
     cart,
     addToCart,
     updateCartQuantity,
@@ -29,13 +30,40 @@ export default function Dashboard() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  const productNames = useMemo(() => {
+      if (!products) return [];
+      return [...new Set(products.map(p => p.name))];
+  }, [products]);
+
+  const productSalesCount = useMemo(() => {
+      const counts: Record<string, number> = {};
+      if (!transactions) return counts;
+
+      transactions.forEach(t => {
+          if (t && t.items) {
+              t.items.forEach(item => {
+                  const id = item.id;
+                  if (id) counts[id] = (counts[id] || 0) + item.quantity;
+              });
+          }
+      });
+      return counts;
+  }, [transactions]);
+
   const filteredProducts = useMemo(() => {
+    if (!products) return [];
+
     return products.filter(product => {
+      if (!product) return false;
       const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = product.name?.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
+    }).sort((a, b) => {
+        const countA = productSalesCount[a.id] || 0;
+        const countB = productSalesCount[b.id] || 0;
+        return countB - countA;
     });
-  }, [products, selectedCategory, searchQuery]);
+  }, [products, selectedCategory, searchQuery, productSalesCount]);
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -80,12 +108,16 @@ export default function Dashboard() {
               <input
                 autoFocus
                 type="text"
+                list="mobile-product-suggestions"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search products..."
                 className="w-full bg-white/10 border border-white/10 rounded-full py-2 pl-4 pr-10 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
                 onBlur={() => !searchQuery && setIsSearchOpen(false)}
               />
+              <datalist id="mobile-product-suggestions">
+                  {productNames.slice(0, 50).map((name, i) => <option key={i} value={name} />)}
+              </datalist>
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
@@ -304,6 +336,12 @@ export default function Dashboard() {
                </button>
                <button onClick={() => handleNavigate('/credit-customers')} className="w-full flex items-center gap-3 p-3 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white transition-colors">
                  <Users className="w-5 h-5" /> Credit Customers
+               </button>
+               <button onClick={() => handleNavigate('/inventory')} className="w-full flex items-center gap-3 p-3 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white transition-colors">
+                 <ShoppingBag className="w-5 h-5" /> Inventory
+               </button>
+               <button onClick={() => handleNavigate('/closing-report')} className="w-full flex items-center gap-3 p-3 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white transition-colors">
+                 <FileText className="w-5 h-5" /> Closing Report
                </button>
                {currentUser?.role === 'admin' && (
                  <button onClick={() => handleNavigate('/salaries')} className="w-full flex items-center gap-3 p-3 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white transition-colors">

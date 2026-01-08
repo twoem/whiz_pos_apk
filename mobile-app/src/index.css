@@ -53,3 +53,18 @@
 .glass-panel {
   @apply bg-slate-900/50 backdrop-blur-xl border border-white/10 shadow-xl;
 }
+
+/* Safe Area Utilities for Mobile */
+.safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+.safe-area-pt {
+    padding-top: env(safe-area-inset-top);
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

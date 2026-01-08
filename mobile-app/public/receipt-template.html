@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Receipt</title>
+    <style>
+        @page {
+            margin: 0;
+            size: auto;
+        }
+        body {
+            font-family: Arial, sans-serif; /* Thicker font for thermal printers */
+            font-size: 12px; /* Reverted to 12px */
+            font-weight: bold; /* Force boldness */
+            color: #000;
+            margin: 0 auto;
+            padding: 0;
+            width: 70mm;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 5px; /* Increased margin */
+        }
+        .header h1 {
+            font-size: 18px; /* Restored size */
+            margin: 0 0 2px 0;
+            text-transform: uppercase;
+        }
+        .header p {
+            margin: 2px 0; /* Increased margin */
+        }
+        .separator {
+            border-top: 1px dashed #000;
+            margin: 5px 0; /* Increased margin */
+        }
+        .info {
+            margin-bottom: 5px;
+        }
+        .info p {
+            margin: 2px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            text-align: left;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 2px;
+        }
+        td {
+            padding: 2px 0;
+            vertical-align: top;
+        }
+        .qty {
+            width: 15%;
+            text-align: center;
+        }
+        .price {
+            width: 25%;
+            text-align: right;
+        }
+        .total {
+            width: 25%;
+            text-align: right;
+        }
+        .totals {
+            margin-top: 5px;
+        }
+        .totals .row {
+            display: flex;
+            justify-content: space-between;
+            margin: 2px 0;
+        }
+        .totals .total-row {
+            font-weight: 900; /* Extra bold */
+            font-size: 14px; /* Restored size */
+            margin-top: 4px;
+            border-top: 1px dashed #000;
+            padding-top: 4px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 11px;
+        }
+        .footer p {
+            margin: 2px 0;
+        }
+        .footer-dev {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 10px;
+        }
+        .payment-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{businessName}}</h1>
+        <p>{{location}}</p>
+        <p>{{address}}</p>
+        <p>{{phone}}</p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="info">
+        <p>Receipt #: {{receiptId}}</p>
+        <p>Date: {{date}}</p>
+        <p>Customer: {{customer}}</p>
+    </div>
+
+    <div class="separator"></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th class="qty">Qty</th>
+                <th class="price">Price</th>
+                <th class="total">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{itemsHtml}}
+        </tbody>
+    </table>
+
+    <div class="separator"></div>
+
+    <div class="totals">
+        <div class="row">
+            <span>Subtotal:</span>
+            <span>{{subtotal}}</span>
+        </div>
+        <div class="row">
+            <span>Tax:</span>
+            <span>{{tax}}</span>
+        </div>
+        <div class="row total-row">
+            <span>TOTAL:</span>
+            <span>{{total}}</span>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="info">
+        <div class="payment-line">
+            <span>Payment : {{paymentMethod}}</span>
+            <span>Served By: {{servedBy}}</span>
+        </div>
+    </div>
+
+    <div style="text-align: center;">
+        {{mpesaDetails}}
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="footer">
+        <p>{{receiptHeader}}</p>
+        {{receiptFooter}}
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="footer-dev">
+        <p>System Designed and serviced by Whiz tech</p>
+        <p>Tell: 0740 841 168</p>
+    </div>
+</body>
+</html>

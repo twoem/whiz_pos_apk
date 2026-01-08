@@ -15,6 +15,8 @@ import SettingsPage from './pages/SettingsPage';
 import PendingSyncsPage from './pages/PendingSyncsPage';
 import ReportsPage from './pages/ReportsPage';
 import SalariesPage from './pages/SalariesPage';
+import ClosingReportPage from './pages/ClosingReportPage';
+import InventoryPage from './pages/InventoryPage';
 
 // Protected Route Wrapper
 const ProtectedRoute = () => {
@@ -56,7 +58,8 @@ function App() {
     setSalaries,
     setCreditCustomers,
     setCategories,
-    setTransactions
+    setTransactions,
+    setBusinessSetup
   } = useMobileStore();
 
   // Background Sync Logic
@@ -92,6 +95,7 @@ function App() {
           if (data.salaries) setSalaries(data.salaries);
           if (data.creditCustomers) setCreditCustomers(data.creditCustomers);
           if (data.transactions) setTransactions(data.transactions); // Sync transactions too
+          if (data.businessSetup) setBusinessSetup(data.businessSetup);
         }
 
         // 3. Remove pushed items from queue only AFTER pull & merge is done
@@ -120,7 +124,8 @@ function App() {
     setSalaries,
     setCreditCustomers,
     setCategories,
-    setTransactions
+    setTransactions,
+    setBusinessSetup
   ]);
 
   if (!isHydrated) {
@@ -144,6 +149,8 @@ function App() {
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/credit-customers" element={<CreditCustomersPage />} />
           <Route path="/salaries" element={<SalariesPage />} />
+          <Route path="/closing-report" element={<ClosingReportPage />} />
+          <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/pending-sync" element={<PendingSyncsPage />} />
         </Route>
