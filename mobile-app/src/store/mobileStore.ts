@@ -138,6 +138,7 @@ interface MobileStore {
   setBusinessSetup: (setup: BusinessSetup) => void;
 
   addTransaction: (transaction: Transaction) => void;
+  deleteTransaction: (id: string) => void;
   addExpense: (expense: Expense) => void;
   addSalary: (salary: Salary) => void;
   addCreditCustomer: (customer: CreditCustomer) => void;
@@ -232,6 +233,13 @@ export const useMobileStore = create<MobileStore>()(
       },
 
       addTransaction: (transaction) => set((state) => ({ transactions: [transaction, ...state.transactions] })),
+
+      deleteTransaction: (id) => set((state) => {
+          const newTransactions = state.transactions.filter(t => t.id !== id);
+          state.addToSyncQueue({ type: 'delete-transaction', data: { id } });
+          return { transactions: newTransactions };
+      }),
+
       addExpense: (expense) => set((state) => ({ expenses: [expense, ...state.expenses] })),
       addSalary: (salary) => set((state) => ({ salaries: [salary, ...state.salaries] })),
       addCreditCustomer: (customer) => set((state) => ({ creditCustomers: [...state.creditCustomers, customer] })),

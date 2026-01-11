@@ -11,9 +11,11 @@ export default function InventoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredProducts = useMemo(() => {
+    if (!products) return [];
     return products.filter(product => {
+      if (!product) return false;
       const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = product.name?.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
   }, [products, selectedCategory, searchQuery]);

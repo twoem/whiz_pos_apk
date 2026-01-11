@@ -112,7 +112,17 @@ function App() {
 
     const interval = setInterval(syncLoop, 10000); // 10 seconds
 
-    return () => clearInterval(interval);
+    // Add immediate sync on online event
+    const handleOnline = () => {
+        console.log("App online, triggering immediate sync");
+        syncLoop();
+    };
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+        clearInterval(interval);
+        window.removeEventListener('online', handleOnline);
+    };
   }, [
     connection.isConnected,
     connection.apiUrl,

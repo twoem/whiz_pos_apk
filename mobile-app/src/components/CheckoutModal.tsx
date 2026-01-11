@@ -207,18 +207,28 @@ export default function CheckoutModal({ isOpen, onClose, total }: CheckoutModalP
 
       try {
           const fileName = `Receipt-${currentTransaction.id}.png`;
-          // For web/browser download
+
+          // Use Capacitor Filesystem to save to Documents directory
+          // Strip base64 prefix if present
+          const base64Data = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+
+          await Filesystem.writeFile({
+              path: fileName,
+              data: base64Data,
+              directory: Directory.Documents
+          });
+
+          alert('Receipt saved to Documents folder');
+
+      } catch (e) {
+          console.error("Save failed", e);
+          // Fallback for web
           const link = document.createElement('a');
           link.href = dataUrl;
-          link.download = fileName;
+          link.download = `Receipt-${currentTransaction.id}.png`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-
-          // Note: For native saving to gallery, we'd need another plugin or media store access,
-          // but browser download works for now or sharing to 'Save to Files'.
-      } catch (e) {
-          console.error("Save failed", e);
       }
   };
 

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useMobileStore } from '../store/mobileStore';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Receipt, Calendar, CreditCard, ChevronLeft, ChevronRight, LayoutGrid, Layers, Printer, Share2 } from 'lucide-react';
+import { ArrowLeft, Search, Receipt, Calendar, CreditCard, ChevronLeft, ChevronRight, LayoutGrid, Layers, Printer, Share2, Trash2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { api } from '../services/api';
 import { toPng } from 'html-to-image';
@@ -10,7 +10,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 
 export default function TransactionsPage() {
   const navigate = useNavigate();
-  const { transactions, currentUser, businessSetup } = useMobileStore();
+  const { transactions, currentUser, businessSetup, deleteTransaction } = useMobileStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'deck'>('deck');
   const [deckIndex, setDeckIndex] = useState(0);
@@ -65,6 +65,16 @@ export default function TransactionsPage() {
              // ...
           } else {
              alert("Sharing not supported in this environment or failed.");
+          }
+      }
+  };
+
+  const handleReverse = (transaction: any) => {
+      if (window.confirm('Are you sure you want to reverse (delete) this transaction? This cannot be undone.')) {
+          deleteTransaction(transaction.id);
+          // Adjust deck index if necessary
+          if (deckIndex >= filteredTransactions.length - 1 && deckIndex > 0) {
+              setDeckIndex(prev => prev - 1);
           }
       }
   };
@@ -228,7 +238,7 @@ export default function TransactionsPage() {
                         </div>
                     </div>
 
-                    <div className="p-4 bg-slate-50 border-t border-slate-100 grid grid-cols-2 gap-3">
+                    <div className="p-4 bg-slate-50 border-t border-slate-100 grid grid-cols-3 gap-3">
                         <button
                             onClick={() => handleReprint(currentCard)}
                             className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors"
@@ -242,6 +252,13 @@ export default function TransactionsPage() {
                         >
                             <Share2 className="w-4 h-4" />
                             Share
+                        </button>
+                        <button
+                            onClick={() => handleReverse(currentCard)}
+                            className="w-full py-3 bg-red-50 border border-red-100 text-red-600 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-100 transition-colors"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Reverse
                         </button>
                     </div>
                     <div className="bg-slate-50 pb-2 text-center text-[10px] text-slate-400">
